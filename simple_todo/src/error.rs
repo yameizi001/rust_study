@@ -34,7 +34,7 @@ impl AppError {
 
     pub fn from_str(msg: &str, error_type: AppErrorType) -> Self {
         AppError {
-            msg: Some(msg),
+            msg: Some(msg.to_string()),
             cause: None,
             error_type,
         }
