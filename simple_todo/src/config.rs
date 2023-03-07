@@ -20,3 +20,16 @@ impl Config {
         cfg.try_deserialize()
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_config() {
+        dotenv::dotenv().ok();
+        let cfg = Config::from_env().unwrap();
+        assert_eq!(cfg.web.addr, "0.0.0.0:7878");
+    }
+}

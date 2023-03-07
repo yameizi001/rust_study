@@ -1,8 +1,21 @@
-mod config;
+use axum::routing::{get, Router};
 
-fn main() {
+mod config;
+mod handler;
+
+#[tokio::main]
+async fn main() {
     // load .env file
     dotenv::dotenv().ok();
     let cfg = config::Config::from_env().expect("Config error");
-    println!("{:#?}", cfg);
+
+    // init route
+    let app = Router::new().route("/", get(handler::usage));
+
+    // listen
+    println!("bind: {}", &cfg.web.addr);
+    axum::Server::bind(&cfg.web.addr.parse().unwrap())
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }
