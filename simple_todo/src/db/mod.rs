@@ -1,6 +1,8 @@
 pub mod todo_list;
+pub mod todo_item;
 
 pub use todo_list::*;
+pub use todo_item::*;
 use tokio_pg_mapper::FromTokioPostgresRow;
 use tokio_postgres::{types::ToSql, GenericClient, Statement};
 

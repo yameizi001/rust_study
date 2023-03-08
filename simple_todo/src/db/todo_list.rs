@@ -1,4 +1,3 @@
-use tokio_pg_mapper::FromTokioPostgresRow;
 use tokio_postgres::Client;
 
 use crate::{
@@ -53,14 +52,14 @@ pub async fn delete(client: &mut Client, id: i32) -> Result<bool> {
     // init transaction
     let tx = client.transaction().await.map_err(AppError::from)?;
     // delete todo list by id
-    let result = execute(&tx, "delete from todo_list where id = $1", &[&id]).await;
+    let result = execute(&tx, "delete from todo_item where list_id = $1", &[&id]).await;
     // rollback when some error happened
     if let Err(err) = result {
         tx.rollback().await.map_err(AppError::from)?;
         return Err(AppError::db_error(err));
     }
     // cascade delete todo item
-    let result = execute(&tx, "delete from todo_item where id = $1", &[&id]).await;
+    let result = execute(&tx, "delete from todo_list where id = $1", &[&id]).await;
     // rollback when some error happened
     if let Err(err) = result {
         tx.rollback().await.map_err(AppError::from)?;

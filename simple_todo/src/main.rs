@@ -41,6 +41,16 @@ async fn main() {
         .route("/todo_list/:id", get(handler::todo_list::find_by_id))
         .route("/todo_list", put(handler::todo_list::update))
         .route("/todo_list/:id", delete(handler::todo_list::delete))
+        .route("/todo_item", post(handler::todo_item::add))
+        .route("/todo_item", get(handler::todo_item::find_all))
+        .route("/todo_item/:id", get(handler::todo_item::find_by_id))
+        .route(
+            "/todo_item/list/:id",
+            get(handler::todo_item::find_by_list_id),
+        )
+        .route("/todo_item", put(handler::todo_item::update))
+        .route("/todo_item/:id", put(handler::todo_item::check))
+        .route("/todo_item/:id", delete(handler::todo_item::delete))
         .layer(Extension(state));
 
     // listen

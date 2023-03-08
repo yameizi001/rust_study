@@ -1,7 +1,9 @@
+pub mod todo_item;
 pub mod todo_list;
 pub mod usage;
 
 use deadpool_postgres::Client;
+pub use todo_item::*;
 pub use todo_list::*;
 pub use usage::*;
 
