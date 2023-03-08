@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# fasthash = "0.4"
+murmur3 = "0.5"
 axum = "0.6"
 tokio = { version="1", features = ["full"] }
 serde = { version="1", features = ["derive"] }
@@ -20,3 +20,4 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 askama = "0.12"
 tower-http = { version = "0.4", features = ["fs"] }
+anyhow = "1"
