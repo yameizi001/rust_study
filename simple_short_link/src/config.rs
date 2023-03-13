@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Config {
     pub web: WebConfig,
     pub pg: deadpool_postgres::Config,
@@ -16,15 +16,14 @@ impl Config {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WebConfig {
     pub addr: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ShortLinkConfig {
     pub reserved_words: String,
-    pub domain: String,
 }
 
 impl ShortLinkConfig {

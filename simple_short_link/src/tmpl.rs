@@ -29,13 +29,13 @@ impl MsgTemplate {
         }
     }
 
-    pub fn ok(msg: &str, target_url: &str) -> Self {
-        Self::new(true, msg.to_string(), Some(target_url.to_string()))
-    }
+    // pub fn ok(msg: &str, target_url: &str) -> Self {
+    //     Self::new(true, msg.to_string(), Some(target_url.to_string()))
+    // }
 
-    pub fn err(msg: &str) -> Self {
-        Self::new(false, msg.to_string(), None)
-    }
+    // pub fn err(msg: &str) -> Self {
+    //     Self::new(false, msg.to_string(), None)
+    // }
 
     pub fn target_url(&self) -> String {
         match self.target_url.clone() {

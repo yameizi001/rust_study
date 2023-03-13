@@ -30,6 +30,9 @@ pub async fn create_action(
     Form(url): Form<CreateUrl>,
 ) -> HandlerRedirectResult {
     let id = core::short_link(&url.url).map_err(AppError::from)?;
+    if (&state).cfg.short_link.in_reserved_words(&id) {
+        return Err(AppError::reserved_word(&id));
+    }
     let handler_name = "url::create";
     let client = get_client(&state, handler_name).await?;
     let result = db::create(&client, url, id)

@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use crate::config::Config;
 use axum::{
     http::{HeaderMap, StatusCode},
     response::Html,
@@ -40,7 +41,10 @@ async fn main() {
         .pg
         .create_pool(None, tokio_postgres::NoTls)
         .expect("Failed to create postgres pool");
-    let state = Arc::new(AppState { pool });
+    let state = Arc::new(AppState {
+        pool,
+        cfg: config.clone(),
+    });
 
     // init route
     let app = Router::new()
@@ -62,4 +66,5 @@ async fn main() {
 #[derive(Debug, Clone)]
 pub struct AppState {
     pub pool: deadpool_postgres::Pool,
+    pub cfg: Config,
 }

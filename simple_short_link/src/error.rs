@@ -9,6 +9,7 @@ pub enum AppErrorType {
     DbError,
     NotFound,
     TemplateError,
+    ReservedWord,
 }
 
 #[derive(Debug)]
@@ -24,6 +25,7 @@ impl AppError {
             AppErrorType::DbError => 1,
             AppErrorType::NotFound => 2,
             AppErrorType::TemplateError => 3,
+            AppErrorType::ReservedWord => 4,
         }
     }
 
@@ -41,6 +43,13 @@ impl AppError {
             cause: None,
             error_type,
         }
+    }
+
+    pub fn reserved_word(word: &str) -> Self {
+        Self::from_str(
+            &format!("Reserved word: {}", word),
+            AppErrorType::ReservedWord,
+        )
     }
 
     pub fn db_error(err: impl ToString) -> Self {

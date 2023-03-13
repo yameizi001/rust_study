@@ -7,6 +7,7 @@ fn hash(s: &str) -> Result<u32> {
     Ok(hash)
 }
 
+#[allow(unused)]
 fn hash_with_seed(s: &str, seed: u32) -> Result<u32> {
     let hash = murmur3::murmur3_32(&mut Cursor::new(s), seed)?;
     Ok(hash)
@@ -32,6 +33,7 @@ pub fn short_link(url: &str) -> Result<String> {
     Ok(u32_to_base62(hash)?)
 }
 
+#[allow(unused)]
 pub fn short_link_with_seed(url: &str, seed: u32) -> Result<String> {
     let hash = hash_with_seed(url, seed)?;
     Ok(u32_to_base62(hash)?)
