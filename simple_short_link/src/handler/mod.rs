@@ -8,7 +8,7 @@ pub mod url;
 
 pub use url::*;
 
-pub async fn get_client(state: AppState, handler_name: &str) -> Result<Client> {
+pub async fn get_client(state: &AppState, handler_name: &str) -> Result<Client> {
     let client = state.pool.get().await.map_err(|err| {
         tracing::error!("Handler[{}] get client failed: {:?}", handler_name, err);
         AppError::from(err)

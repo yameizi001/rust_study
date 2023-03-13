@@ -6,7 +6,8 @@ use axum::{
     routing::get,
     Extension, Router,
 };
-use handler::index;
+use handler::{goto_url, index, msg, rank};
+use tower_http::services::ServeDir;
 
 mod config;
 mod core;
@@ -43,9 +44,16 @@ async fn main() {
     let state = Arc::new(AppState { pool });
 
     // init route
-    let app = Router::new().route("/", get(index)).layer(Extension(state));
+    let app = Router::new()
+        .route("/", get(index))
+        .route("/target/:id", get(goto_url))
+        .route("/rank", get(rank))
+        .route("/msg", get(msg))
+        .nest_service("/static", ServeDir::new("static"))
+        .layer(Extension(state));
 
     // start server
+    tracing::info!("Server started on {:?}", &config.web.addr);
     axum::Server::bind(&config.web.addr.parse().unwrap())
         .serve(app.into_make_service())
         .await
