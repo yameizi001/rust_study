@@ -6,7 +6,6 @@ use axum::{
     routing::get,
     Extension, Router,
 };
-use handler::{goto_url, index, msg, rank};
 use tower_http::services::ServeDir;
 
 mod config;
@@ -45,10 +44,10 @@ async fn main() {
 
     // init route
     let app = Router::new()
-        .route("/", get(index))
-        .route("/target/:id", get(goto_url))
-        .route("/rank", get(rank))
-        .route("/msg", get(msg))
+        .route("/", get(handler::index).post(handler::create_action))
+        .route("/target/:id", get(handler::goto_url))
+        .route("/rank", get(handler::rank))
+        .route("/msg", get(handler::msg))
         .nest_service("/static", ServeDir::new("static"))
         .layer(Extension(state));
 

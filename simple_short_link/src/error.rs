@@ -54,6 +54,13 @@ impl AppError {
     pub fn not_found() -> Self {
         Self::from_str("Not found", AppErrorType::NotFound)
     }
+
+    pub fn is_not_found(&self) -> bool {
+        match self.error_type {
+            AppErrorType::NotFound => true,
+            _ => false,
+        }
+    }
 }
 
 impl From<deadpool_postgres::PoolError> for AppError {
@@ -70,6 +77,12 @@ impl From<tokio_postgres::Error> for AppError {
 
 impl From<askama::Error> for AppError {
     fn from(err: askama::Error) -> Self {
+        Self::tmpl_error(err)
+    }
+}
+
+impl From<anyhow::Error> for AppError {
+    fn from(err: anyhow::Error) -> Self {
         Self::tmpl_error(err)
     }
 }

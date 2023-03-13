@@ -3,12 +3,13 @@ use std::sync::Arc;
 use axum::{
     extract::{Path, Query},
     http::{header, HeaderMap, StatusCode},
-    Extension,
+    Extension, Form,
 };
 
 use crate::{
-    db,
-    model::MsgArgs,
+    core, db,
+    error::AppError,
+    model::{CreateUrl, MsgArgs},
     tmpl::{IndexTemplate, MsgTemplate, RankTemplate},
     AppState, HandlerHtmlResult, HandlerRedirectResult, RedirectResponse,
 };
@@ -21,6 +22,25 @@ pub async fn index() -> HandlerHtmlResult {
     let tmpl = IndexTemplate {};
     let html = render(tmpl).map_err(log_error(handler_name.to_string()))?;
     Ok(html)
+}
+
+// handle create action
+pub async fn create_action(
+    Extension(state): Extension<Arc<AppState>>,
+    Form(url): Form<CreateUrl>,
+) -> HandlerRedirectResult {
+    let id = core::short_link(&url.url).map_err(AppError::from)?;
+    let handler_name = "url::create";
+    let client = get_client(&state, handler_name).await?;
+    let result = db::create(&client, url, id)
+        .await
+        .map_err(log_error(handler_name.to_string()))?;
+    let msg = MsgArgs {
+        ok: Some(format!("添加成功, 短网址是：{}", result.id)),
+        err: None,
+        target: Some("/".to_string()),
+    };
+    Ok(redirect_with_msg("/msg", Some(&msg)))
 }
 
 // goto url
