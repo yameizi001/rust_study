@@ -1,0 +1,16 @@
+DROP TABLE IF EXISTS todo_list;
+
+CREATE TABLE todo_list(
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(150) NOT NULL
+);
+
+DROP TABLE IF EXISTS todo_item;
+
+CREATE TABLE todo_item(
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    checked BOOLEAN NOT NULL DEFAULT FALSE,
+    list_id INTEGER NOT NULL,
+    FOREIGN KEY(list_id) REFERENCES todo_list(id)
+);
