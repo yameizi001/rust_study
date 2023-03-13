@@ -5,7 +5,7 @@ use crate::{
     Result,
 };
 
-use super::query_one;
+use super::{query, query_one};
 
 pub async fn create(client: &Client, url: CreateUrl, id: String) -> Result<UrlID> {
     let result = query_one(client, "SELECT id FROM url WHERE id = $1", &[&id]).await;
@@ -34,5 +34,11 @@ pub async fn goto_url(client: &mut Client, id: String) -> Result<UrlTarget> {
 }
 
 pub async fn rank(client: &Client) -> Result<Vec<Url>> {
-    unreachable!()
+    let result = query(
+        client,
+        "select * from url where is_del = false order by visit desc",
+        &[],
+    )
+    .await?;
+    Ok(result)
 }
