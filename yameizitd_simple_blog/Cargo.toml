@@ -1,0 +1,29 @@
+[package]
+name = "yameizitd_simple_blog"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# log
+tracing = "0.1"
+tracing-subscriber = "0.3"
+# error
+thiserror = "1"
+anyhow = "1"
+# runtime
+tokio = { version="1", features = ["full"] }
+# config
+dotenv = "0.15"
+config = "0.13"
+# serialization
+serde = { version="1", features = ["derive"] }
+serde_json = "1"
+# http
+tower-http = { version = "0.4", features = ["full"] }
+axum = { version="0.6", features = ["tokio"] }
+# tmpl
+askama = "0.12"
+# db
+sqlx = { version = "0.6", default-features = false, features = ["runtime-tokio-native-tls", "postgres", "macros"] }
