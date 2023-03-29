@@ -25,9 +25,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .connect(&app_config.postgres.build_connection())
         .await?;
     tracing::debug!("Init postgres pool successfully");
-    db::category::delete_by_id(&pool, 2).await.map_err(|e| {
-        tracing::error!("{:#?}", e);
-        e
-    })?;
+    db::category::select_by_option(
+        &pool,
+        form::QueryForm {
+            page_num: Some(1),
+            page_size: Some(10),
+            id: Some(1),
+            name: Some("Rust".to_string()),
+        },
+    )
+    .await?;
     Ok(())
 }

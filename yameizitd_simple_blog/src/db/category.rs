@@ -2,7 +2,7 @@ use db_error::DbError;
 use sqlx::{postgres::PgRow, Pool, Postgres, Row};
 
 use crate::{
-    db::post,
+    db::{post, DynamicQuery},
     error::db_error,
     form::{CreateForm, QueryForm, UpdateForm},
     model::{self, Category},
@@ -59,11 +59,12 @@ pub async fn select_by_option(
     form: QueryForm,
 ) -> Result<Vec<Category>, DbError> {
     tracing::debug!("Select category by option: {:?}", form);
-
-    let sql = format!(
-        "select id, name, num from simple_blog_category {} limit $3 offset $4",
-        &form.page()
-    );
+    let sql = DynamicQuery::builder("select id, name, num from simple_blog_category")
+        .condition("id", form.id)
+        .condition("name", form.name)
+        .page(form.page_num, form.page_size)
+        .build();
+    tracing::debug!("Dynamic sql: {}", sql);
     let records = sqlx::query(&sql)
         .map(|row: PgRow| Category {
             id: row.get::<i64, _>("id"),
