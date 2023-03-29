@@ -1,6 +1,9 @@
 use sqlx::postgres::PgPoolOptions;
 
 mod config;
+mod db;
+mod error;
+mod form;
 mod model;
 
 #[tokio::main]
@@ -22,12 +25,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .connect(&app_config.postgres.build_connection())
         .await?;
     tracing::debug!("Init postgres pool successfully");
-    let records: Vec<model::Category> = sqlx::query_as!(
-        model::Category,
-        "select id, name, num from simple_blog_category"
-    )
-    .fetch_all(&pool)
-    .await?;
-    tracing::debug!("Records of simple_blog_category:\n{:#?}", records);
+    db::category::delete_by_id(&pool, 2).await.map_err(|e| {
+        tracing::error!("{:#?}", e);
+        e
+    })?;
     Ok(())
 }
