@@ -58,20 +58,28 @@ pub async fn select_by_option(
     pool: &Pool<Postgres>,
     form: QueryForm,
 ) -> Result<Vec<Category>, DbError> {
-    tracing::debug!("Select category by option: {:?}", form);
-    let sql = DynamicQuery::builder("select id, name, num from simple_blog_category")
-        .condition("id", form.id)
-        .condition("name", form.name)
-        .page(form.page_num, form.page_size)
-        .build();
+    tracing::debug!("Select category by option:\n{:#?}", form);
+    let dyn_query = DynamicQuery::builder("select id, name, num from simple_blog_category")
+        .and("id", "=", form.id)
+        .or("name", "=", form.name.as_ref())
+        .page(form.page_num, form.page_size);
+    let sql = dyn_query.build_sql();
     tracing::debug!("Dynamic sql: {}", sql);
-    let records = sqlx::query(&sql)
-        .map(|row: PgRow| Category {
-            id: row.get::<i64, _>("id"),
-            name: row.get::<String, _>("name"),
-            num: row.get::<i64, _>("num"),
-        })
+    let records = sqlx::query(sql)
+        .bind(form.id)
+        .bind(form.name)
+        .bind(dyn_query.limit)
+        .bind(dyn_query.offset)
+        .map(map_to_category)
         .fetch_all(pool)
         .await?;
     Ok(records)
+}
+
+fn map_to_category(row: PgRow) -> Category {
+    Category {
+        id: row.get::<i64, _>("id"),
+        name: row.get::<String, _>("name"),
+        num: row.get::<i64, _>("num"),
+    }
 }

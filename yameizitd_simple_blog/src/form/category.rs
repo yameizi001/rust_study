@@ -13,8 +13,8 @@ pub struct UpdateForm {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct QueryForm {
-    pub page_num: Option<u64>,
-    pub page_size: Option<u64>,
+    pub page_num: Option<i64>,
+    pub page_size: Option<i64>,
     pub id: Option<i64>,
     pub name: Option<String>,
 }
