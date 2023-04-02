@@ -1,17 +1,17 @@
 use db_error::DbError;
-use sqlx::{postgres::PgRow, Pool, Postgres, Row};
+use sqlx::{Pool, Postgres};
 
 use crate::{
     db::{post, DynamicQuery},
     error::db_error,
     form::{CreateForm, QueryForm, UpdateForm},
-    model::{self, Category},
+    model::Category,
 };
 
 pub async fn insert_category_by_name(
     pool: &Pool<Postgres>,
     form: CreateForm,
-) -> Result<model::Category, DbError> {
+) -> Result<Category, DbError> {
     tracing::debug!("Insert category by name: {:?}", form.name);
     let record = sqlx::query!(
         r#"insert into simple_blog_category(name) values($1) returning id, name, num"#,
@@ -19,7 +19,7 @@ pub async fn insert_category_by_name(
     )
     .fetch_one(pool)
     .await?;
-    let category = model::Category {
+    let category = Category {
         id: record.id,
         name: record.name,
         num: record.num,
@@ -54,32 +54,17 @@ pub async fn update(pool: &Pool<Postgres>, form: UpdateForm) -> Result<bool, DbE
     Ok(row.rows_affected() > 0)
 }
 
-pub async fn select_by_option(
+pub async fn select_by_options(
     pool: &Pool<Postgres>,
     form: QueryForm,
 ) -> Result<Vec<Category>, DbError> {
     tracing::debug!("Select category by option:\n{:#?}", form);
-    let dyn_query = DynamicQuery::builder("select id, name, num from simple_blog_category")
+    let records = DynamicQuery::builder("select id, name, num from simple_blog_category")
         .and("id", "=", form.id)
-        .or("name", "=", form.name.as_ref())
-        .page(form.page_num, form.page_size);
-    let sql = dyn_query.build_sql();
-    tracing::debug!("Dynamic sql: {}", sql);
-    let records = sqlx::query(sql)
-        .bind(form.id)
-        .bind(form.name)
-        .bind(dyn_query.limit)
-        .bind(dyn_query.offset)
-        .map(map_to_category)
+        .or("name", "=", form.name)
+        .page(form.page_num, form.page_size)
+        .build_as::<Category>()
         .fetch_all(pool)
         .await?;
     Ok(records)
-}
-
-fn map_to_category(row: PgRow) -> Category {
-    Category {
-        id: row.get::<i64, _>("id"),
-        name: row.get::<String, _>("name"),
-        num: row.get::<i64, _>("num"),
-    }
 }

@@ -25,16 +25,5 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .connect(&app_config.postgres.build_connection())
         .await?;
     tracing::debug!("Init postgres pool successfully");
-    let records = db::category::select_by_option(
-        &pool,
-        form::QueryForm {
-            page_num: Some(1),
-            page_size: Some(10),
-            id: Some(1),
-            name: Some("Rust".to_string()),
-        },
-    )
-    .await?;
-    tracing::debug!("Records:\n{:#?}", records);
     Ok(())
 }
