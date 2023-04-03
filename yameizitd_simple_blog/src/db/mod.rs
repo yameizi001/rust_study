@@ -17,6 +17,7 @@ pub struct DynamicQuery<'args, DB: Database> {
     pub update_separated: bool,
 }
 
+#[allow(unused)]
 impl<'args, DB> DynamicQuery<'args, DB>
 where
     DB: Database,
@@ -31,7 +32,7 @@ where
         }
     }
 
-    pub fn update<T>(mut self, column: &str, property: T) -> Self
+    pub fn update<T>(self, column: &str, property: T) -> Self
     where
         T: 'args + Encode<'args, DB> + Send + Type<DB>,
     {
@@ -53,7 +54,19 @@ where
         self
     }
 
-    fn and<T>(mut self, column_name: &str, expression: &str, condition: Option<T>) -> Self
+    pub fn and<T>(self, column_name: &str, expression: &str, condition: T) -> Self
+    where
+        T: 'args + Encode<'args, DB> + Send + Type<DB>,
+    {
+        self.and_optional(column_name, expression, Some(condition))
+    }
+
+    pub fn and_optional<T>(
+        mut self,
+        column_name: &str,
+        expression: &str,
+        condition: Option<T>,
+    ) -> Self
     where
         T: 'args + Encode<'args, DB> + Send + Type<DB>,
     {
@@ -72,7 +85,19 @@ where
         self
     }
 
-    fn or<T>(mut self, column_name: &str, expression: &str, condition: Option<T>) -> Self
+    pub fn or<T>(self, column_name: &str, expression: &str, condition: T) -> Self
+    where
+        T: 'args + Encode<'args, DB> + Send + Type<DB>,
+    {
+        self.or_optional(column_name, expression, Some(condition))
+    }
+
+    pub fn or_optional<T>(
+        mut self,
+        column_name: &str,
+        expression: &str,
+        condition: Option<T>,
+    ) -> Self
     where
         T: 'args + Encode<'args, DB> + Send + Type<DB>,
     {
@@ -91,11 +116,15 @@ where
         self
     }
 
-    fn page(self, page_num: Option<i64>, page_size: Option<i64>) -> Self {
+    pub fn page(self, page_num: i64, page_size: i64) -> Self {
+        self.page_optional(Some(page_num), Some(page_size))
+    }
+
+    pub fn page_optional(self, page_num: Option<i64>, page_size: Option<i64>) -> Self {
         self.page_with_default(page_num, page_size, 1, 10)
     }
 
-    fn page_with_default(
+    pub fn page_with_default(
         mut self,
         page_num: Option<i64>,
         page_size: Option<i64>,
@@ -123,7 +152,6 @@ where
     pub fn build_as<'q, T: FromRow<'q, DB::Row>>(
         &'q mut self,
     ) -> QueryAs<'q, DB, T, <DB as HasArguments<'args>>::Arguments> {
-        r#"sqlx-page-helper"#;
-        self.inner_query_builder.build_query_as()
+        self.inner_query_builder.build_query_as::<T>()
     }
 }

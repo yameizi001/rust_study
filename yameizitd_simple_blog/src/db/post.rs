@@ -112,7 +112,7 @@ pub async fn update(pool: &Pool<Postgres>, form: UpdateForm) -> Result<bool, DbE
         .update_optional("secret", form.secret)
         .update("status_sign", form.status_sign.toi16())
         .update("is_private", form.is_private)
-        .and("id", "=", Some(form.id))
+        .and("id", "=", form.id)
         .build()
         .execute(pool)
         .await?;

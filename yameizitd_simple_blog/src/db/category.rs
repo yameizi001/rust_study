@@ -56,9 +56,9 @@ pub async fn select_by_options(
 ) -> Result<Vec<Category>, DbError> {
     tracing::debug!("Select category by option:\n{:#?}", form);
     let records = DynamicQuery::builder("select id, name, num from simple_blog_category")
-        .and("id", "=", form.id)
-        .or("name", "=", form.name)
-        .page(form.page_num, form.page_size)
+        .and_optional("id", "=", form.id)
+        .or_optional("name", "=", form.name)
+        .page_optional(form.page_num, form.page_size)
         .build_as::<Category>()
         .fetch_all(pool)
         .await?;
