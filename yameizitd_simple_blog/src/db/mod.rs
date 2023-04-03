@@ -14,6 +14,7 @@ pub struct DynamicQuery<'args, DB: Database> {
     pub inner_query_builder: sqlx::QueryBuilder<'args, DB>,
     pub conditional: bool,
     pub condition_index: u64,
+    pub update_separated: bool,
 }
 
 impl<'args, DB> DynamicQuery<'args, DB>
@@ -26,7 +27,30 @@ where
             inner_query_builder: sqlx::QueryBuilder::new(base_sql),
             conditional: false,
             condition_index: 1,
+            update_separated: false,
         }
+    }
+
+    pub fn update<T>(mut self, column: &str, property: T) -> Self
+    where
+        T: 'args + Encode<'args, DB> + Send + Type<DB>,
+    {
+        self.update_optional(column, Some(property))
+    }
+
+    pub fn update_optional<T>(mut self, column: &str, property: Option<T>) -> Self
+    where
+        T: 'args + Encode<'args, DB> + Send + Type<DB>,
+    {
+        if let Some(property) = property {
+            if self.update_separated {
+                self.inner_query_builder.push(", ");
+            }
+            self.inner_query_builder.push(format!(" {} = ", column));
+            self.inner_query_builder.push_bind(property);
+            self.update_separated = true;
+        }
+        self
     }
 
     fn and<T>(mut self, column_name: &str, expression: &str, condition: Option<T>) -> Self

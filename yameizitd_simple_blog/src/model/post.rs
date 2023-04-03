@@ -46,7 +46,7 @@ pub enum StatusSign {
 }
 
 impl StatusSign {
-    pub fn toi8(&self) -> i8 {
+    pub fn toi16(&self) -> i16 {
         match self {
             StatusSign::DRAFT => 0,
             StatusSign::RELEASE => 1,
