@@ -1,5 +1,7 @@
 use sqlx::postgres::PgPoolOptions;
 
+use crate::{db::post, form::DraftForm};
+
 mod config;
 mod db;
 mod error;
@@ -24,6 +26,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .max_connections(app_config.postgres.pool.max_size)
         .connect(&app_config.postgres.build_connection())
         .await?;
+    let draft = DraftForm {
+        category_id: None,
+        title: "test draft".to_string(),
+        digest: Some("description".to_string()),
+        sketch: None,
+        markdown: None,
+        html: None,
+        tags: None,
+        secret: None,
+    };
+    let id = post::insert_draft(&pool, draft).await?;
+    tracing::debug!("Insert draft, id: {}", id);
     tracing::debug!("Init postgres pool successfully");
     Ok(())
 }

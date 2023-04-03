@@ -1,31 +1,27 @@
 use db_error::DbError;
-use sqlx::{Pool, Postgres};
+use sqlx::{Pool, Postgres, Row};
 
 use crate::{
     db::{post, DynamicQuery},
     error::db_error,
-    form::{CreateForm, QueryForm, UpdateForm},
+    form::category::UpdateForm,
+    form::{CreateForm, QueryForm},
     model::Category,
 };
 
 pub async fn insert_category_by_name(
     pool: &Pool<Postgres>,
     form: CreateForm,
-) -> Result<Category, DbError> {
+) -> Result<i64, DbError> {
     tracing::debug!("Insert category by name: {:?}", form.name);
-    let record = sqlx::query!(
-        r#"insert into simple_blog_category(name) values($1) returning id, name, num"#,
-        form.name
-    )
-    .fetch_one(pool)
-    .await?;
-    let category = Category {
-        id: record.id,
-        name: record.name,
-        num: record.num,
-    };
-    tracing::debug!("Inserted category: {:?}", category);
-    Ok(category)
+    let record =
+        sqlx::query(r#"insert into simple_blog_category ( name ) values( $1 ) returning id"#)
+            .bind(form.name)
+            .fetch_one(pool)
+            .await?;
+    let id = record.get::<i64, _>("id");
+    tracing::debug!("Inserted category: {:?}", id);
+    Ok(id)
 }
 
 pub async fn delete_by_id(pool: &Pool<Postgres>, id: i64) -> Result<bool, DbError> {
