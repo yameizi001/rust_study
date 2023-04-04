@@ -6,7 +6,7 @@ use crate::{
     error::db_error,
     form::category::UpdateForm,
     form::{category::QueryForm, CreateForm},
-    model::Category,
+    model::category::Category,
 };
 
 pub async fn insert_category_by_name(

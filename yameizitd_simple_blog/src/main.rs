@@ -35,7 +35,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         page_num: None,
         page_size: None,
     };
-    let records = db::post::select_by_options(&pool, form).await?;
+    let records = db::post::select_overview_by_options(&pool, form).await?;
     tracing::debug!("\n{:#?}", records);
+    let record = db::post::select_detail_by_id(&pool, 7).await?;
+    tracing::debug!("\n{:#?}", record);
     Ok(())
 }
