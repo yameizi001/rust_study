@@ -127,18 +127,19 @@ pub async fn select_overview_by_options(
     form: QueryForm,
 ) -> Result<Vec<PostOverview>, DbError> {
     tracing::debug!("Select post overview by options:\n{:#?}", form);
-    let records = sqlx::query_as::<Postgres, PostOverview>(
+    let records = sqlx::query(
         r#"
         select 
             post.id, category.id category_id, category.name, category.num, title, digest, sketch, tags, views, 
             likes, comments, create_at::text, status_sign, is_private
         from 
             simple_blog_post post
-        inner join 
+        left join 
             simple_blog_category category 
         on 
             category.id = category_id
         "#)
+    .map(|row| PostOverview::from_row(row))
     .fetch_all(pool)
     .await?;
     Ok(records)

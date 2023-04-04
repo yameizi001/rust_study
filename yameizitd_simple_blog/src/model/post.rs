@@ -3,11 +3,12 @@ use sqlx::{postgres::PgRow, FromRow, Row};
 
 use crate::error::DbError;
 
-#[derive(Debug, Serialize, Deserialize, FromRow)]
+use super::category::Category;
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PostOverview {
     pub id: i64,
-    #[sqlx(flatten)]
-    pub category: Category,
+    pub category: Option<Category>,
     pub title: String,
     pub digest: Option<String>,
     pub sketch: Option<String>,
@@ -16,16 +17,52 @@ pub struct PostOverview {
     pub likes: i64,
     pub comments: i64,
     pub create_at: String,
-    #[sqlx(try_from = "i16")]
     pub status_sign: StatusSign,
     pub is_private: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize, FromRow)]
+impl PostOverview {
+    pub fn from_row(row: PgRow) -> Self {
+        PostOverview {
+            id: row.get("id"),
+            category: if row.try_get::<i64, _>("category_id").is_ok() {
+                Some(Category {
+                    id: row.get("category_id"),
+                    name: row.get("name"),
+                    num: row.get("num"),
+                })
+            } else {
+                None
+            },
+            title: row.get("title"),
+            digest: if row.try_get::<String, _>("digest").is_ok() {
+                Some(row.get("digest"))
+            } else {
+                None
+            },
+            sketch: if row.try_get::<String, _>("sketch").is_ok() {
+                Some(row.get("sketch"))
+            } else {
+                None
+            },
+            tags: if row.try_get::<String, _>("tags").is_ok() {
+                Some(row.get("tags"))
+            } else {
+                None
+            },
+            views: row.get("views"),
+            likes: row.get("likes"),
+            comments: row.get("comments"),
+            create_at: row.get("create_at"),
+            status_sign: row.get::<i16, _>("status_sign").try_into().unwrap(),
+            is_private: row.get("is_private"),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PostDetail {
     pub id: i64,
-    #[sqlx(default)]
-    #[sqlx(flatten)]
     pub category: Option<Category>,
     pub title: String,
     pub digest: Option<String>,
@@ -38,7 +75,6 @@ pub struct PostDetail {
     pub likes: i64,
     pub comments: i64,
     pub create_at: String,
-    #[sqlx(try_from = "i16")]
     pub status_sign: StatusSign,
     pub is_private: bool,
 }
@@ -95,14 +131,6 @@ impl PostDetail {
             is_private: row.get("is_private"),
         }
     }
-}
-
-#[derive(Debug, Serialize, Deserialize, FromRow)]
-pub struct Category {
-    #[sqlx(rename = "category_id")]
-    pub id: i64,
-    pub name: String,
-    pub num: i64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
