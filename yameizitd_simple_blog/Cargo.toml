@@ -28,4 +28,4 @@ axum = { version="0.6", features = ["tokio"] }
 # tmpl
 askama = "0.12"
 # db
-sqlx = { version = "0.6", default-features = false, features = ["runtime-tokio-native-tls", "postgres", "macros"] }
+sqlx = { version = "0.6", default-features = false, features = ["runtime-tokio-native-tls", "postgres", "macros", "offline"] }

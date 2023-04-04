@@ -1,11 +1,5 @@
 use sqlx::postgres::PgPoolOptions;
 
-use crate::{
-    db::post,
-    form::{post::UpdateForm, DraftForm, ReleaseForm},
-    model::StatusSign,
-};
-
 mod config;
 mod db;
 mod error;
@@ -31,32 +25,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .connect(&app_config.postgres.build_connection())
         .await?;
     tracing::debug!("Init postgres pool successfully");
-    // let release = ReleaseForm {
-    //     category_id: None,
-    //     title: "test draft".to_string(),
-    //     digest: Some("description".to_string()),
-    //     sketch: None,
-    //     markdown: None,
-    //     html: None,
-    //     tags: None,
-    //     secret: None,
-    //     is_private: false,
-    // };
-    // let id = post::insert_release(&pool, release).await?;
-    let form = UpdateForm {
-        id: 5,
-        category_id: Some(1),
-        title: "update test release".to_string(),
-        digest: Some("".to_string()),
-        sketch: Some("https://...".to_string()),
-        markdown: None,
-        html: None,
-        tags: Some("tag1,tag2,tag3".to_string()),
-        secret: None,
-        status_sign: StatusSign::RELEASE,
-        is_private: false,
+    let form = form::post::QueryForm {
+        id: None,
+        category_id: None,
+        title: None,
+        tags: None,
+        status_sign: None,
+        is_private: None,
+        page_num: None,
+        page_size: None,
     };
-    let updated = post::update(&pool, form).await?;
-    tracing::debug!("Update post, id({}): {}", 5, updated);
+    let records = db::post::select_by_options(&pool, form).await?;
+    tracing::debug!("\n{:#?}", records);
     Ok(())
 }

@@ -6,6 +6,8 @@ pub enum DbError {
     AssociatedFieldInUse { field_val: String },
     #[error("Some error occurred while executing sql")]
     SqlxPostgresError(#[from] sqlx::error::Error),
+    #[error("Some error occurred while convert PgType into i16: {cause:?}")]
+    DbTypeConvertError { cause: String },
 }
 
 impl DbError {

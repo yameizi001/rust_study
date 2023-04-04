@@ -5,8 +5,11 @@ use sqlx::{Pool, Postgres, Row};
 use crate::{
     db::DynamicQuery,
     error::db_error,
-    form::{post::UpdateForm, DraftForm, ReleaseForm},
-    model::StatusSign,
+    form::{
+        post::{QueryForm, UpdateForm},
+        DraftForm, ReleaseForm,
+    },
+    model::{post::PostOverview, StatusSign},
 };
 
 pub async fn insert_draft(pool: &Pool<Postgres>, form: DraftForm) -> Result<i64, DbError> {
@@ -117,6 +120,38 @@ pub async fn update(pool: &Pool<Postgres>, form: UpdateForm) -> Result<bool, DbE
         .execute(pool)
         .await?;
     Ok(row.rows_affected() > 0)
+}
+
+pub async fn select_by_options(
+    pool: &Pool<Postgres>,
+    form: QueryForm,
+) -> Result<Vec<PostOverview>, DbError> {
+    tracing::debug!("Select post overview by options:\n{:#?}", form);
+    // let records = DynamicQuery::builder("select id, name, num from simple_blog_category")
+    //     .and_optional("id", "=", form.id)
+    //     .and_optional("category_id", "=", form.category_id)
+    //     .and_optional("title", "like", form.title)
+    //     .and_optional("tags", "like", form.tags)
+    //     .and_optional("status_sign", "=", form.status_sign)
+    //     .and_optional("is_private", "=", form.is_private)
+    //     .page_optional(form.page_num, form.page_size)
+    //     .build_as::<PostOverview>()
+    //     .fetch_all(pool)
+    //     .await?;
+    let records = sqlx::query_as::<Postgres, PostOverview>(
+        r#"
+        select 
+            post.id, category.name, category.num, title, digest, sketch, tags, views, likes, comments, create_at::text, status_sign, is_private
+        from 
+            simple_blog_post post
+        inner join 
+            simple_blog_category category 
+        on 
+            category.id = category_id
+        "#)
+    .fetch_all(pool)
+    .await?;
+    Ok(records)
 }
 
 pub async fn exist_by_category_id(pool: &Pool<Postgres>, category_id: i64) -> Result<i64, DbError> {

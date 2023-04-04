@@ -5,7 +5,7 @@ use crate::{
     db::{post, DynamicQuery},
     error::db_error,
     form::category::UpdateForm,
-    form::{CreateForm, QueryForm},
+    form::{category::QueryForm, CreateForm},
     model::Category,
 };
 
@@ -54,10 +54,10 @@ pub async fn select_by_options(
     pool: &Pool<Postgres>,
     form: QueryForm,
 ) -> Result<Vec<Category>, DbError> {
-    tracing::debug!("Select category by option:\n{:#?}", form);
+    tracing::debug!("Select category by options:\n{:#?}", form);
     let records = DynamicQuery::builder("select id, name, num from simple_blog_category")
         .and_optional("id", "=", form.id)
-        .or_optional("name", "=", form.name)
+        .and_optional("name", "=", form.name)
         .page_optional(form.page_num, form.page_size)
         .build_as::<Category>()
         .fetch_all(pool)
