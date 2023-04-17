@@ -129,16 +129,14 @@ pub async fn select_overview_by_options(
     tracing::debug!("Select post overview by options:\n{:#?}", form);
     let records = sqlx::query(
         r#"
-        select 
-            post.id, category.id category_id, category.name, category.num, title, digest, sketch, tags, views, 
-            likes, comments, create_at::text, status_sign, is_private
-        from 
-            simple_blog_post post
-        left join 
-            simple_blog_category category 
-        on 
-            category.id = category_id
-        "#)
+        select * from get_blog_by_options($1, $2, $3, $4, $5)
+        "#,
+    )
+    .bind(form.id)
+    .bind(form.category_id)
+    .bind(form.title)
+    .bind(form.tags)
+    .bind(StatusSign::DRAFT.toi16())
     .map(|row| PostOverview::from_row(row))
     .fetch_all(pool)
     .await?;
