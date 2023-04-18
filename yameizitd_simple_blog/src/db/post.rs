@@ -122,20 +122,24 @@ pub async fn update(pool: &Pool<Postgres>, form: UpdateForm) -> Result<bool, DbE
     Ok(row.rows_affected() > 0)
 }
 
-pub async fn select_overview_by_options(
+pub async fn select_overviews_by_options(
     pool: &Pool<Postgres>,
     form: QueryForm,
 ) -> Result<Vec<PostOverview>, DbError> {
     tracing::debug!("Select post overview by options:\n{:#?}", form);
     let records = sqlx::query(
         r#"
-        select * from get_blog_by_options($1, $2, $3, $4, $5)
+        select * from select_post_overviews_by_options($1, $2, $3, $4, $5, $6, $7, $8)
         "#,
     )
     .bind(form.id)
     .bind(form.category_id)
     .bind(form.title)
     .bind(form.tags)
+    .bind(Some(StatusSign::DRAFT.toi16()))
+    .bind(form.is_private)
+    .bind(form.page_num)
+    .bind(form.page_size)
     .bind(StatusSign::DRAFT.toi16())
     .map(|row| PostOverview::from_row(row))
     .fetch_all(pool)

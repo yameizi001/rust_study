@@ -151,7 +151,7 @@ where
 
     pub fn build_as<'q, T: FromRow<'q, DB::Row>>(
         &'q mut self,
-    ) -> QueryAs<'q, DB, T, <DB as HasArguments<'args>>::Arguments> {
+    ) -> QueryAs<'_, DB, T, <DB as HasArguments<'args>>::Arguments> {
         self.inner_query_builder.build_query_as::<T>()
     }
 }
