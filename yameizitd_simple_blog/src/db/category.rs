@@ -30,7 +30,10 @@ pub async fn delete_by_id(pool: &Pool<Postgres>, id: i64) -> Result<bool, DbErro
     let count = post::exist_by_category_id(pool, id).await?;
     if count > 0 {
         tracing::warn!("Category has been in use by {:?} posts", count);
-        Err(DbError::associated_in_use(id.to_string()))
+        Err(DbError::associated_in_use(
+            "category id".to_string(),
+            id.to_string(),
+        ))
     } else {
         let row = sqlx::query(r#"delete from simple_blog_category where id = $1"#)
             .bind(id)
