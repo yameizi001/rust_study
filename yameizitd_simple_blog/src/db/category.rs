@@ -58,7 +58,7 @@ pub async fn select_by_options(
     form: QueryForm,
 ) -> Result<Vec<Category>, DbError> {
     tracing::debug!("Select category by options:\n{:#?}", form);
-    let records = DynamicQuery::builder("select id, name, num from simple_blog_category")
+    let records = DynamicQuery::builder(r#"select id, name, num from simple_blog_category"#)
         .and_optional("id", "=", form.id)
         .and_optional("name", "=", form.name)
         .page_optional(form.page_num, form.page_size)

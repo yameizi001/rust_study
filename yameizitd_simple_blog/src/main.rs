@@ -28,8 +28,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let form = form::post::QueryForm {
         id: None,
         category_id: None,
-        title: Some("test".to_string()),
-        tags: Some("tag2".to_string()),
+        title: None,
+        tags: None,
         status_sign: None,
         is_private: None,
         page_num: None,

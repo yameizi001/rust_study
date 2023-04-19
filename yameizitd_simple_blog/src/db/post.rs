@@ -127,23 +127,45 @@ pub async fn select_overviews_by_options(
     form: QueryForm,
 ) -> Result<Vec<PostOverview>, DbError> {
     tracing::debug!("Select post overview by options:\n{:#?}", form);
-    let records = sqlx::query(
-        r#"
-        select * from select_post_overviews_by_options($1, $2, $3, $4, $5, $6, $7, $8)
-        "#,
-    )
-    .bind(form.id)
-    .bind(form.category_id)
-    .bind(form.title)
-    .bind(form.tags)
-    .bind(Some(StatusSign::DRAFT.toi16()))
-    .bind(form.is_private)
-    .bind(form.page_num)
-    .bind(form.page_size)
-    .bind(StatusSign::DRAFT.toi16())
-    .map(|row| PostOverview::from_row(row))
-    .fetch_all(pool)
-    .await?;
+    // let records = sqlx::query(
+    //     r#"
+    //     select * from select_post_overviews_by_options($1, $2, $3, $4, $5, $6, $7, $8)
+    //     "#,
+    // )
+    // .bind(form.id)
+    // .bind(form.category_id)
+    // .bind(form.title)
+    // .bind(form.tags)
+    // .bind(Some(StatusSign::DRAFT.toi16()))
+    // .bind(form.is_private)
+    // .bind(form.page_num)
+    // .bind(form.page_size)
+    // .bind(StatusSign::DRAFT.toi16())
+    // .map(|row| PostOverview::from_row(row))
+    // .fetch_all(pool)
+    // .await?;
+    let records = DynamicQuery::builder(r#"
+            select 
+                category.id category_id, category.name, category.num, 
+                post.id, title, digest, sketch, tags, views, likes, comments, create_at::text, status_sign, is_private
+            from 
+                simple_blog_post post
+            left join 
+                simple_blog_category category 
+            on 
+                category.id = category_id
+        "#)
+        .and_optional("id", "=", form.id)
+        .and_optional("category_id", "=", form.category_id)
+        .and_optional("title", "like", form.title)
+        .and_optional("tags", "like", form.tags)
+        .and_optional("status_sign", "=", Some(StatusSign::DRAFT.toi16()))
+        .and_optional("is_private", "=", form.is_private)
+        .page_optional(form.page_num, form.page_size)
+        .build()
+        .map(PostOverview::from_row)
+        .fetch_all(pool)
+        .await?;
     Ok(records)
 }
 
